@@ -4,11 +4,13 @@ import org.jgroups.JChannel;
 import org.jgroups.Message;
 import org.jgroups.ReceiverAdapter;
 import org.jgroups.View;
+import org.jgroups.stack.IpAddress;
 
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.Inet4Address;
 
 /**
  * Created with IntelliJ IDEA.
@@ -26,7 +28,7 @@ public class Client extends ReceiverAdapter {
         System.out.println(userName);
         channel = new JChannel();
         channel.setReceiver(this);
-        channel.connect("ChatCluster");
+        channel.connect("ChatCluster", new IpAddress("224.0.0.251",765),10);
         eventLoop();
         channel.close();
     }
