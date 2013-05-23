@@ -30,6 +30,7 @@ public class Client extends ReceiverAdapter {
 
     private void start() throws Exception {
         System.out.println(userName);
+        System.setProperty("java.net.preferIPv4Stack" , "true");
         channel = new JChannel();
         ProtocolStack stack=new ProtocolStack(); // (2)
 
