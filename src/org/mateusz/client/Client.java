@@ -4,13 +4,19 @@ import org.jgroups.JChannel;
 import org.jgroups.Message;
 import org.jgroups.ReceiverAdapter;
 import org.jgroups.View;
+import org.jgroups.protocols.*;
+import org.jgroups.protocols.pbcast.GMS;
+import org.jgroups.protocols.pbcast.NAKACK;
+import org.jgroups.protocols.pbcast.STABLE;
 import org.jgroups.stack.IpAddress;
+import org.jgroups.stack.ProtocolStack;
 
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Inet4Address;
+import java.net.InetAddress;
 
 /**
  * Created with IntelliJ IDEA.
@@ -27,8 +33,46 @@ public class Client extends ReceiverAdapter {
     private void start() throws Exception {
         System.out.println(userName);
         channel = new JChannel();
+        ProtocolStack stack=new ProtocolStack(); // (2)
+
+        channel.setProtocolStack(stack);
+
+        stack.addProtocol(new UDP().setValue("bind_addr",
+
+                InetAddress.getByName("192.168.42.1")))
+
+                .addProtocol(new PING())
+
+                .addProtocol(new MERGE2())
+
+                .addProtocol(new FD_SOCK())
+
+                .addProtocol(new FD_ALL().setValue("timeout", 12000)
+
+                        .setValue("interval", 3000))
+
+                .addProtocol(new VERIFY_SUSPECT())
+
+                .addProtocol(new BARRIER())
+
+                .addProtocol(new NAKACK())
+
+                .addProtocol(new UNICAST2())
+
+                .addProtocol(new STABLE())
+
+                .addProtocol(new GMS())
+
+                .addProtocol(new UFC())
+
+                .addProtocol(new MFC())
+
+                .addProtocol(new FRAG2());       // (3)
+
+        stack.init();                            // (4)
+
         channel.setReceiver(this);
-        channel.connect("ChatCluster", new IpAddress("224.0.0.251",765),10);
+        channel.connect("ChatCluster");
         eventLoop();
         channel.close();
     }
