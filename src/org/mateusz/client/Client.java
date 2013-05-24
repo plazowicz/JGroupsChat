@@ -33,7 +33,7 @@ public class Client extends ReceiverAdapter {
         channel.setProtocolStack(stack);
         channel.setName(userName);
 
-        stack.addProtocol(new UDP().setValue("bind_addr",InetAddress.getByName("224.0.0.251")))
+        stack.addProtocol(new UDP().setValue("mcast_group_addr",InetAddress.getByName("224.0.0.251")))
                 .addProtocol(new PING())
                 .addProtocol(new MERGE2())
                 .addProtocol(new FD_SOCK())
