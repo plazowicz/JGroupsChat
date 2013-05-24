@@ -12,6 +12,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
+import java.util.Scanner;
+import java.util.logging.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -21,6 +23,9 @@ import java.net.InetAddress;
  * To change this template use File | Settings | File Templates.
  */
 public class Client extends ReceiverAdapter {
+
+
+    public static final Logger logger = Logger.getLogger(Client.class.getSimpleName());
 
     JChannel channel;
     String userName = System.getProperty("user.name","n/a");
@@ -94,10 +99,38 @@ public class Client extends ReceiverAdapter {
     }
 
     public static void main(String[] args) {
-        try {
-            new Client().start();
-        } catch (Exception e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        if( args.length != 2 ) {
+            logger.info("Usage: java Talker MULTICAST_ADDRESS NICK");
+            System.exit(-1);
+        }
+        String multicast = args[0];
+        String nick = args[1];
+        Talker t = new Talker(multicast,nick);
+        boolean running = true;
+        while( running ) {
+            System.out.println("Please choose one of options: (c)reate channel, " +
+                    "(j)oin channel, (l)ist available channels with members,(s)end message or (q)uit");
+            try {
+                switch (System.in.read()) {
+                    case 'c':
+                        break;
+                    case 'j':
+                        break;
+                    case 'l':
+                        break;
+                    case 's':
+                        break;
+                    case 'q':
+                        System.out.println("Leaving chat...");
+                        System.exit(0);
+                    default:
+                        System.out.println("Wrong option!");
+                        break;
+                }
+            } catch (IOException e) {
+                logger.severe(e.getMessage());
+            }
+
         }
     }
 }
