@@ -224,7 +224,7 @@ public class Talker extends ReceiverAdapter {
     private class ShutDownHookThread extends Thread {
 
         public void run() {
-            System.out.println("execute?");
+            System.out.println("Shut down hook executing...");
             for(String channelName : channels.keySet() ) {
                 leave(channelName);
             }
