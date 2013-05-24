@@ -22,7 +22,6 @@ public class Talker extends ReceiverAdapter {
 
     public static final Logger logger = Logger.getLogger(Talker.class.getSimpleName());
 
-    private String multicast;
     private JChannel managementChannel;
     private ChannelFactory channelFactory;
     private String nick;
@@ -30,8 +29,7 @@ public class Talker extends ReceiverAdapter {
     private Map<String,List<String>> cache;
     private Map<String,JChannel> channels = new HashMap<String,JChannel>();
 
-    public Talker(String multicast, String nick) {
-        this.multicast = multicast;
+    public Talker(String nick) {
         this.nick = nick;
         cache = new HashMap<String, List<String>>();
         state = ChatOperationProtos.ChatState.newBuilder().build();
@@ -159,6 +157,7 @@ public class Talker extends ReceiverAdapter {
 
     public void leave(String channelName) {
         sendChatAction(channelName,nick, ChatOperationProtos.ChatAction.ActionType.LEAVE);
+        channels.get(channelName).close();
         channels.remove(channelName);
     }
 
@@ -206,8 +205,8 @@ public class Talker extends ReceiverAdapter {
     private class ShutDownHookThread extends Thread {
 
         public void run() {
-            for(JChannel channel : channels.values() ) {
-                channel.close();
+            for(String channelName : channels.keySet() ) {
+                leave(channelName);
             }
         }
 
