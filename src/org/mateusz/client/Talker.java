@@ -58,22 +58,25 @@ public class Talker extends ReceiverAdapter {
         if( cache.keySet().contains(channelName)) {
             System.out.println("There is already channel: "+channelName);
         }
-        if( createOrJoin(channelName))
-            System.out.println("Create succeeded");
-        else
-            System.out.println("Create failed");
-
+        else {
+            if( createOrJoin(channelName))
+                System.out.println("Create succeeded");
+            else
+                System.out.println("Create failed");
+        }
     }
 
     public void joinChannel(final String channelName) {
        Map<String,List<String>> cache = getCache();
-       if( !cache.keySet().contains(channelName))
+       if( !cache.keySet().contains(channelName)) {
             System.out.println("There is no channel: "+channelName);
-        if( createOrJoin(channelName) )
-            System.out.println("Join succeeded");
-        else
-            System.out.println("Join failed");
-
+       }
+       else {
+           if( createOrJoin(channelName) )
+                System.out.println("Join succeeded");
+           else
+                System.out.println("Join failed");
+       }
     }
 
     private boolean createOrJoin(final String channelName) {
@@ -128,17 +131,29 @@ public class Talker extends ReceiverAdapter {
 
     private void updateCache() {
         synchronized (state) {
+            List<String> members;
             cache = new HashMap<String, List<String>>();
             for(ChatOperationProtos.ChatAction ca : state.getStateList()) {
-                  if( cache.containsKey(ca.getChannel())) {
-                      List<String> members = cache.get(ca.getChannel());
-                      members.add(ca.getNickname());
-                      cache.put(ca.getChannel(), members);
+                  if( ca.getAction() == ChatOperationProtos.ChatAction.ActionType.JOIN ) {
+                      if( cache.containsKey(ca.getChannel())) {
+                          members = cache.get(ca.getChannel());
+                          members.add(ca.getNickname());
+                          cache.put(ca.getChannel(), members);
+                      }
+                      else {
+                          members = new ArrayList<String>();
+                          members.add(ca.getNickname());
+                          cache.put(ca.getChannel(), members);
+                      }
                   }
                   else {
-                      List<String> members = new ArrayList<String>();
-                      members.add(ca.getNickname());
-                      cache.put(ca.getChannel(), members);
+                      members = cache.get(ca.getChannel());
+                      if( members.size() == 0 )
+                          cache.remove(ca.getChannel());
+                      else {
+                          members.remove(ca.getNickname());
+                          cache.put(ca.getChannel(),members);
+                      }
                   }
             }
         }
@@ -156,9 +171,12 @@ public class Talker extends ReceiverAdapter {
     }
 
     public void leave(String channelName) {
-        sendChatAction(channelName,nick, ChatOperationProtos.ChatAction.ActionType.LEAVE);
-        channels.get(channelName).close();
-        channels.remove(channelName);
+        if( channels.containsKey(channelName )) {
+            sendChatAction(channelName,nick, ChatOperationProtos.ChatAction.ActionType.LEAVE);
+            channels.get(channelName).close();
+            channels.remove(channelName);
+        }
+        System.out.println("You cant live chat if you're not in");
     }
 
     private void sendChatAction(String channelName, String nick, ChatOperationProtos.ChatAction.ActionType type) {
