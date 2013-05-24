@@ -30,13 +30,13 @@ public class Client extends ReceiverAdapter {
 
     private void start() throws Exception {
         System.out.println(userName);
-        System.setProperty("java.net.preferIPv4Stack" , "true");
         channel = new JChannel();
         ProtocolStack stack=new ProtocolStack(); // (2)
 
         channel.setProtocolStack(stack);
+        channel.setName(userName);
 
-        stack.addProtocol(new UDP())
+        stack.addProtocol(new UDP().setValue("bind_addr",InetAddress.getByName("192.168.42.1")))
                 .addProtocol(new PING())
                 .addProtocol(new MERGE2())
                 .addProtocol(new FD_SOCK())
