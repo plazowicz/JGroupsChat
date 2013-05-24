@@ -176,7 +176,8 @@ public class Talker extends ReceiverAdapter {
             channels.get(channelName).close();
             channels.remove(channelName);
         }
-        System.out.println("You cant live chat if you're not in");
+        else
+            System.out.println("You cant live chat if you're not in");
     }
 
     private void sendChatAction(String channelName, String nick, ChatOperationProtos.ChatAction.ActionType type) {
@@ -223,6 +224,7 @@ public class Talker extends ReceiverAdapter {
     private class ShutDownHookThread extends Thread {
 
         public void run() {
+            System.out.println("execute?");
             for(String channelName : channels.keySet() ) {
                 leave(channelName);
             }
