@@ -6,14 +6,11 @@ import org.jgroups.ReceiverAdapter;
 import org.jgroups.View;
 import org.jgroups.protocols.*;
 import org.jgroups.protocols.pbcast.*;
-import org.jgroups.stack.IpAddress;
 import org.jgroups.stack.ProtocolStack;
 
-import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.Inet4Address;
 import java.net.InetAddress;
 
 /**
@@ -36,7 +33,7 @@ public class Client extends ReceiverAdapter {
         channel.setProtocolStack(stack);
         channel.setName(userName);
 
-        stack.addProtocol(new UDP().setValue("bind_addr",InetAddress.getByName("192.168.42.1")))
+        stack.addProtocol(new UDP().setValue("bind_addr",InetAddress.getByName("224.0.0.251")))
                 .addProtocol(new PING())
                 .addProtocol(new MERGE2())
                 .addProtocol(new FD_SOCK())
