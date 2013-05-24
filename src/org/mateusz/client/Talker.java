@@ -4,7 +4,6 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import org.jgroups.JChannel;
 import org.jgroups.Message;
 import org.jgroups.ReceiverAdapter;
-import org.jgroups.View;
 import org.mateusz.chat.protos.ChatOperationProtos;
 
 import java.io.InputStream;
@@ -48,9 +47,9 @@ public class Talker extends ReceiverAdapter {
         } catch (Exception e) {
             logger.severe(e.getMessage());
         }
-        addShutDownHook(managementChannel);
+        Runtime.getRuntime().addShutdownHook(new ShutDownHookThread());
         try {
-            managementChannel.getState(null,10000);
+            managementChannel.getState(null,1000);
         } catch (Exception e) {
             logger.severe(e.getMessage());
         }
@@ -100,6 +99,11 @@ public class Talker extends ReceiverAdapter {
             channel.setName(nick);
             sendChatAction(channelName,nick, ChatOperationProtos.ChatAction.ActionType.JOIN);
             channels.put(channelName, channel);
+            try {
+                channel.connect(channelName);
+            } catch (Exception e) {
+                logger.severe(e.getMessage());
+            }
             return true;
         }
         else {
@@ -134,7 +138,9 @@ public class Talker extends ReceiverAdapter {
                       cache.put(ca.getChannel(), members);
                   }
                   else {
-                      cache.put(ca.getChannel(), Arrays.asList(ca.getNickname()));
+                      List<String> members = new ArrayList<String>();
+                      members.add(ca.getNickname());
+                      cache.put(ca.getChannel(), members);
                   }
             }
         }
@@ -151,7 +157,7 @@ public class Talker extends ReceiverAdapter {
 
     }
 
-    public void leave(String channelName, String nick) {
+    public void leave(String channelName) {
         sendChatAction(channelName,nick, ChatOperationProtos.ChatAction.ActionType.LEAVE);
         channels.remove(channelName);
     }
@@ -167,10 +173,6 @@ public class Talker extends ReceiverAdapter {
         } catch (Exception e) {
             logger.severe(e.getMessage());
         }
-    }
-
-    public void addShutDownHook(JChannel channel) {
-        Runtime.getRuntime().addShutdownHook(new ShutDownHookThread(channel));
     }
 
     public void receive(Message message) {
@@ -203,14 +205,10 @@ public class Talker extends ReceiverAdapter {
 
     private class ShutDownHookThread extends Thread {
 
-        private JChannel channel;
-
-        public ShutDownHookThread(JChannel channel) {
-            this.channel = channel;
-        }
-
         public void run() {
-            channel.close();
+            for(JChannel channel : channels.values() ) {
+                channel.close();
+            }
         }
 
     }
